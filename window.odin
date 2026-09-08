@@ -1,7 +1,5 @@
 package main
 
-import "core:c"
-
 import "vendor:glfw"
 import gl "vendor:OpenGL"
 
@@ -9,12 +7,6 @@ GL_MAJOR :: 3
 GL_MINOR :: 3
 SCREEN_WIDTH :: 800
 SCREEN_HEIGHT :: 600
-
-GLFW_Error :: enum {
-	None = 0,
-	Init_Error,
-	Window_Error
-}
 
 init_window :: proc() -> (window: glfw.WindowHandle, err: GLFW_Error) {
 	if !glfw.Init() do return nil, .Init_Error
@@ -41,7 +33,6 @@ process_input :: proc(window: glfw.WindowHandle) {
 	}
 }
 
-framebuffer_size_callback :: proc "c" (window: glfw.WindowHandle, width, height: c.int32_t) {
+framebuffer_size_callback :: proc "c" (window: glfw.WindowHandle, width, height: i32) {
 	gl.Viewport(0, 0, width, height)
 }
-
