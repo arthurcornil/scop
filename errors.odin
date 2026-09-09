@@ -3,7 +3,7 @@ package main
 import "core:fmt"
 import "core:os"
 
-Error :: union {
+Error :: union #shared_nil {
 	GLFW_Error,
 	Shader_Error
 }

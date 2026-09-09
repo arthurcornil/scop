@@ -1,25 +1,18 @@
 package main
 
-import "core:fmt"
-import "core:os"
-import "core:strings"
+import "core:math"
 
 import "vendor:glfw"
 import gl "vendor:OpenGL"
 
-vertices := [?]f32{
-    -0.5, -0.5, 0.0,
-     0.5, -0.5, 0.0,
-     0.0,  0.5, 0.0
-}
-
-VAO :: u32
-VBO :: u32
-Shader_Program :: u32
-
-render :: proc(window: glfw.WindowHandle, vao: VAO) {
+render :: proc(window: glfw.WindowHandle, vao: VAO, program: Shader_Program) {
 	gl.ClearColor(0.2, 0.3, 0.3, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+	time_value := glfw.GetTime()
+	green_value: f32 = math.sin(f32(time_value)) / 2.0 + 0.5
+	vertex_color_location := gl.GetUniformLocation(program, "ourColor")
+	gl.Uniform4f(vertex_color_location, 0.0, green_value, 0.3, 1.0)
 
 	gl.BindVertexArray(vao)
 	defer gl.BindVertexArray(0)
@@ -29,33 +22,20 @@ render :: proc(window: glfw.WindowHandle, vao: VAO) {
 }
 
 main :: proc() {
-	window, err := init_window()
+	err: Error
+	window: glfw.WindowHandle
+
+	window, err = init_window()
 	if err != nil do fatal(err)
 	defer glfw.Terminate()
 	defer glfw.DestroyWindow(window)
 
-	//set vao and vbo
-	vao: VAO
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
+	triangle: VAO = get_vao()
 
-	vbo: VBO
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	//describe gpu buffer data
-	gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices), &vertices, gl.STATIC_DRAW)
-	//describe vertex attributes
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
-	gl.EnableVertexAttribArray(0)
-
-	//shaders
-	vertex_shader := string(#load("vertex.glsl"))
-	fragment_shader := string(#load("fragment.glsl"))
-
-	shader_program, ok := gl.load_shaders_source(vertex_shader, fragment_shader)
-	if !ok {
-		//TODO: handle error properly once in other function
-		os.exit(1)
+	shader_program: Shader_Program
+	shader_program, err = get_shader_program()
+	if err != nil {
+		fatal(err)
 	}
 
 	gl.UseProgram(shader_program)
@@ -64,6 +44,6 @@ main :: proc() {
 		process_input(window)
 		glfw.PollEvents()
 
-		render(window, vao)
+		render(window, triangle, shader_program)
 	}
 }
