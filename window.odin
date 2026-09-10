@@ -22,6 +22,7 @@ init_window :: proc() -> (window: glfw.WindowHandle, err: GLFW_Error) {
 	glfw.MakeContextCurrent(window)
 	glfw.SwapInterval(1)
 	gl.load_up_to(GL_MAJOR, GL_MINOR, glfw.gl_set_proc_address)
+	gl.Enable(gl.DEPTH_TEST)
 	glfw.SetFramebufferSizeCallback(window, framebuffer_size_callback)
 
 	return
