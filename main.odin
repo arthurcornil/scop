@@ -73,10 +73,13 @@ main :: proc() {
 
 	m := mesh.Mesh{}
 	defer delete(m.vertices)
+	defer delete(m.faces)
 
 	//Init Mesh
 	err := parser.parse(os.args[1], &m)
 	if err != nil {
+		delete(m.vertices)
+		delete(m.faces)
 		errors.fatal(err)
 	}
 

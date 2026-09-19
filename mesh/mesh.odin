@@ -4,6 +4,7 @@ import gl "vendor:OpenGL"
 
 Mesh :: struct {
 	vertices: [dynamic]f32,
+	faces: [dynamic]i32,
 	vao: u32
 }
 

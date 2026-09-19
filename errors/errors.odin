@@ -12,8 +12,9 @@ Shader_Error :: enum {
 Parsing_Error :: enum {
 	None = 0,
 	Not_A_Vertex,
-	Vertex_Format,
-	Wrong_Number_Of_Attributes
+	Wrong_Format,
+	Wrong_Number_Of_Attributes,
+	Not_A_Face
 }
 
 GLFW_Error :: enum {
@@ -46,10 +47,10 @@ fatal :: proc(err: Error) {
 	case Parsing_Error:
 		error_type = "Parsing Error"
 		#partial switch e {
-		case .Vertex_Format:
-			details = "Wrong format for vertex"
+		case .Wrong_Format:
+			details = "Format Error"
 		case .Wrong_Number_Of_Attributes:
-			details = "Too much or few attributes for vertex"
+			details = "Too many or few attributes"
 		}
 	case Shader_Error:
 		error_type = "Shader Error"
