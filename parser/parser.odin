@@ -1,4 +1,4 @@
-package odin
+package parser
 
 import "core:fmt"
 import "core:os"
@@ -56,6 +56,7 @@ parse_face :: proc(line: string) -> (face: []u32, err: errors.Parsing_Error) {
 parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
 	data: []u8
 	data, err = os.read_entire_file(file_name, context.allocator)
+	defer delete(data)
 	if err != nil {
 		return err
 	}

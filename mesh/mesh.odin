@@ -28,7 +28,7 @@ get_vao :: proc(mesh: ^Mesh) -> u32 {
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
 	gl.BufferData(
 		gl.ELEMENT_ARRAY_BUFFER,
-		size_of(i32) * len(mesh.faces),
+		size_of(u32) * len(mesh.faces),
 		raw_data(mesh.faces),
 		gl.STATIC_DRAW
 	)
