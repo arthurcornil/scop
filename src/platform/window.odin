@@ -27,7 +27,6 @@ init_window :: proc() -> (window: Window, err: errors.GLFW_Error) {
 	gl.load_up_to(GL_MAJOR, GL_MINOR, glfw.gl_set_proc_address)
 	gl.Enable(gl.DEPTH_TEST)
 	glfw.SetFramebufferSizeCallback(window, framebuffer_size_callback)
-
 	return
 }
 
@@ -42,6 +41,18 @@ framebuffer_size_callback :: proc "c" (window: glfw.WindowHandle, width, height:
 	gl.Viewport(0, 0, width, height)
 }
 
-should_close :: proc(win: Window) -> bool {
-	return bool(glfw.WindowShouldClose(win))
+should_close :: proc(win: Window) -> bool { return bool(glfw.WindowShouldClose(win)) }
+
+swap_buffers :: proc(win: Window) { glfw.SwapBuffers(win) }
+
+destroy :: proc(win: Window) {
+	glfw.DestroyWindow(win)
+	glfw.Terminate()
 }
+
+aspect :: proc(win: Window) -> f32 {
+	w, h := glfw.GetFramebufferSize(win)
+	return h == 0 ? 1 : f32(w) / f32(h)
+}
+
+time :: proc() -> f64 { return glfw.GetTime() }
