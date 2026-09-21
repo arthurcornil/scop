@@ -1,6 +1,5 @@
 package scene
 
-import "core:math"
 import "core:math/linalg"
 
 Vec3 :: [3]f32

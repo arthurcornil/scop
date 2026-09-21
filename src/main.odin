@@ -2,11 +2,6 @@ package main
 
 import "core:fmt"
 import "core:os"
-import "core:math"
-import "core:math/linalg"
-
-import "vendor:glfw"
-import gl "vendor:OpenGL"
 
 import "./parser"
 import "./renderer"
