@@ -30,7 +30,7 @@ Error :: union #shared_nil {
 	Shader_Error
 }
 
-fatal :: proc(err: Error) {
+report :: proc(err: Error) {
 	if err == nil do return
 
 	error_type: string
@@ -63,5 +63,4 @@ fatal :: proc(err: Error) {
 		details = os.error_string(e)
 	}
 	fmt.eprintfln("%s: %s", error_type, details)
-	os.exit(1)
 }

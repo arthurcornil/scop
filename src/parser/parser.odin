@@ -1,6 +1,5 @@
 package parser
 
-import "core:fmt"
 import "core:os"
 import "core:strings"
 import "core:strconv"
@@ -83,7 +82,7 @@ parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
 				return err
 			}
 			for i in 1..<len(face) - 1 {
-				append(&m.faces, face[0], face[i], face[i + 1])
+				append(&m.indices, face[0], face[i], face[i + 1])
 			}
 			delete(face)
 		}

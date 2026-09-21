@@ -9,12 +9,13 @@ import "vendor:glfw"
 import gl "vendor:OpenGL"
 
 import "./parser"
+import "./renderer"
 import "./mesh"
 import "./errors"
 
 Window :: glfw.WindowHandle
 
-render :: proc(window: Window, m: mesh.Mesh, program: u32) {
+render :: proc(window: Window, g: ^renderer.GPU_Mesh, program: u32) {
 	gl.ClearColor(0.2, 0.3, 0.3, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -48,9 +49,9 @@ render :: proc(window: Window, m: mesh.Mesh, program: u32) {
 	gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, &projection[0][0])
 
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
-	gl.BindVertexArray(m.vao)
+	gl.BindVertexArray(g.vao)
 	defer gl.BindVertexArray(0)
-	gl.DrawElements(gl.TRIANGLES, i32(len(m.faces)), gl.UNSIGNED_INT, nil)
+	gl.DrawElements(gl.TRIANGLES, g.count_indices, gl.UNSIGNED_INT, nil)
 
 	glfw.SwapBuffers(window)
 }
@@ -67,44 +68,36 @@ get_shader_program :: proc() -> (sp: u32, err: errors.Error) {
 	return
 }
 
+run :: proc(path: string) -> (err: errors.Error) {
+	win := init_window() or_return
+	defer glfw.Terminate()
+	defer glfw.DestroyWindow(win)
+
+	m := mesh.Mesh{}
+	defer mesh.destroy(&m)
+	parser.parse(path, &m) or_return
+
+	gpu_data := renderer.upload(&m)
+	defer renderer.destroy(&gpu_data)
+	mesh.destroy(&m)
+
+	shader_program := get_shader_program() or_return
+
+	for !glfw.WindowShouldClose(win) {
+		process_input(win)
+		glfw.PollEvents()
+		render(win, &gpu_data, shader_program)
+	}
+	return nil
+}
+
 main :: proc() {
 	if len(os.args) != 2 {
 		fmt.eprintln("Usage: scop [PATH TO .obj FILE]")
 		os.exit(1)
 	}
-
-	m := mesh.Mesh{}
-	defer delete(m.vertices)
-	defer delete(m.faces)
-
-	//Init Mesh
-	err := parser.parse(os.args[1], &m)
-	if err != nil {
-		delete(m.vertices)
-		delete(m.faces)
-		errors.fatal(err)
-	}
-
-	//Init Window
-	win: Window
-	win, err = init_window()
-	if err != nil {
-		errors.fatal(err)
-	}
-	defer glfw.Terminate()
-	defer glfw.DestroyWindow(win)
-
-	m.vao = mesh.get_vao(&m)
-	shader_program: u32
-	shader_program, err = get_shader_program()
-	if err != nil {
-		errors.fatal(err)
-	}
-
-	for !glfw.WindowShouldClose(win) {
-		process_input(win)
-		glfw.PollEvents()
-
-		render(win, m, shader_program)
+	if err := run(os.args[1]); err != nil {
+		errors.report(err)
+		os.exit(1)
 	}
 }
