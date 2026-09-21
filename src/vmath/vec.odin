@@ -13,9 +13,10 @@ get_len :: proc(vec: Vec3) -> f32 {
 }
 
 normalize :: proc(vec: Vec3) -> Vec3 {
-	vec := vec
 	len := get_len(vec)
+	if len == 0 do return
 
+	vec := vec
 	vec[0] /= len
 	vec[1] /= len
 	vec[2] /= len
