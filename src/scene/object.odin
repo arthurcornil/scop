@@ -1,6 +1,7 @@
 package scene
 
 import "core:math/linalg"
+import "../vmath"
 
 Object :: struct {
 	center: Vec3,
@@ -12,6 +13,6 @@ update :: proc(o: ^Object, dt: f32) {
 }
 
 get_model_mat :: proc(o: Object) -> Mat4 {
-	return linalg.matrix4_rotate(o.angle, WORLD_UP) *
+	return vmath.mat_rotate(o.angle, WORLD_UP) *
 		linalg.matrix4_translate(-o.center)
 }
