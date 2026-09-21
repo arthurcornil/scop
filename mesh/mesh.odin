@@ -4,7 +4,7 @@ import gl "vendor:OpenGL"
 
 Mesh :: struct {
 	vertices: [dynamic]f32,
-	faces: [dynamic]i32,
+	faces: [dynamic]u32,
 	vao: u32
 }
 
@@ -20,6 +20,16 @@ get_vao :: proc(mesh: ^Mesh) -> u32 {
 		gl.ARRAY_BUFFER,
 		size_of(f32) * len(mesh.vertices),
 		raw_data(mesh.vertices),
+		gl.STATIC_DRAW
+	)
+
+	ebo: u32
+	gl.GenBuffers(1, &ebo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+	gl.BufferData(
+		gl.ELEMENT_ARRAY_BUFFER,
+		size_of(i32) * len(mesh.faces),
+		raw_data(mesh.faces),
 		gl.STATIC_DRAW
 	)
 

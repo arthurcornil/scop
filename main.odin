@@ -2,14 +2,15 @@ package main
 
 import "core:fmt"
 import "core:os"
-import "./parser"
-import "./mesh"
-import "./errors"
 import "core:math"
 import "core:math/linalg"
 
 import "vendor:glfw"
 import gl "vendor:OpenGL"
+
+import "./parser"
+import "./mesh"
+import "./errors"
 
 Window :: glfw.WindowHandle
 
@@ -20,13 +21,13 @@ render :: proc(window: Window, m: mesh.Mesh, program: u32) {
 	gl.UseProgram(program)
 
 	model := linalg.matrix4_rotate(
-		12,
-		[?]f32{0.0, 1.0, 0.0}
+		0.0,
+		[?]f32{-0.5, 1.0, 0.5}
 	)
 
 	radius: f32 : 10.0
-	camX: f32 = f32(math.sin(1.0)) * radius
-	camZ: f32 = f32(math.cos(1.0)) * radius
+	camX: f32 = f32(math.sin(glfw.GetTime())) * radius
+	camZ: f32 = f32(math.cos(glfw.GetTime())) * radius
 	view := linalg.matrix4_look_at(
 		[3]f32{camX, 0.0, camZ},
 		[3]f32{0.0, 0.0, 0.0},
@@ -46,9 +47,10 @@ render :: proc(window: Window, m: mesh.Mesh, program: u32) {
 	projectionLoc := gl.GetUniformLocation(program, "projection")
 	gl.UniformMatrix4fv(projectionLoc, 1, gl.FALSE, &projection[0][0])
 
+	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	gl.BindVertexArray(m.vao)
 	defer gl.BindVertexArray(0)
-	gl.DrawArrays(gl.TRIANGLES, 0, i32(len(m.vertices) / 3))
+	gl.DrawElements(gl.TRIANGLES, i32(len(m.faces)), gl.UNSIGNED_INT, nil)
 
 	glfw.SwapBuffers(window)
 }
