@@ -12,10 +12,9 @@ import "./parser"
 import "./renderer"
 import "./mesh"
 import "./errors"
+import "./platform"
 
-Window :: glfw.WindowHandle
-
-render :: proc(window: Window, g: ^renderer.GPU_Mesh, program: u32) {
+render :: proc(window: platform.Window, g: ^renderer.GPU_Mesh, program: u32) {
 	gl.ClearColor(0.2, 0.3, 0.3, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -69,7 +68,7 @@ get_shader_program :: proc() -> (sp: u32, err: errors.Error) {
 }
 
 run :: proc(path: string) -> (err: errors.Error) {
-	win := init_window() or_return
+	win := platform.init_window() or_return
 	defer glfw.Terminate()
 	defer glfw.DestroyWindow(win)
 
@@ -83,9 +82,8 @@ run :: proc(path: string) -> (err: errors.Error) {
 
 	shader_program := get_shader_program() or_return
 
-	for !glfw.WindowShouldClose(win) {
-		process_input(win)
-		glfw.PollEvents()
+	for !platform.should_close(win) {
+		platform.process_input(win)
 		render(win, &gpu_data, shader_program)
 	}
 	return nil

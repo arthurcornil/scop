@@ -1,10 +1,11 @@
-package main
+package platform
 
 import "vendor:glfw"
 import gl "vendor:OpenGL"
 
-import "./errors"
+import "../errors"
 
+Window :: glfw.WindowHandle
 GL_MAJOR :: 3
 GL_MINOR :: 3
 SCREEN_WIDTH :: 800
@@ -30,7 +31,8 @@ init_window :: proc() -> (window: Window, err: errors.GLFW_Error) {
 	return
 }
 
-process_input :: proc(window: glfw.WindowHandle) {
+process_input :: proc(window: Window) {
+	glfw.PollEvents()
 	if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
 		glfw.SetWindowShouldClose(window, true)
 	}
@@ -38,4 +40,8 @@ process_input :: proc(window: glfw.WindowHandle) {
 
 framebuffer_size_callback :: proc "c" (window: glfw.WindowHandle, width, height: i32) {
 	gl.Viewport(0, 0, width, height)
+}
+
+should_close :: proc(win: Window) -> bool {
+	return bool(glfw.WindowShouldClose(win))
 }
