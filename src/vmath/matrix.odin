@@ -3,7 +3,6 @@ package vmath
 import "core:math"
 
 Mat4 :: matrix[4, 4]f32
-WORLD_UP :: Vec3{0.0, 1.0, 0.0}
 
 to_radians :: proc (angle: f32) -> f32 {
 	return angle * (math.PI / 180)

@@ -3,6 +3,8 @@ package main
 import "core:fmt"
 import "core:os"
 
+import gl "vendor:OpenGL"
+
 import "./parser"
 import "./renderer"
 import "./mesh"
