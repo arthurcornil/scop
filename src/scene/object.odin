@@ -13,6 +13,5 @@ update :: proc(o: ^Object, dt: f32) {
 }
 
 get_model_mat :: proc(o: Object) -> vmath.Mat4 {
-	return vmath.mat_rotate(o.angle, WORLD_UP) *
-		linalg.matrix4_translate(-o.center)
+	return vmath.mat_rotate_y(o.angle) * vmath.mat_translate(-o.center)
 }

@@ -8,7 +8,7 @@ to_radians :: proc (angle: f32) -> f32 {
 	return angle * (math.PI / 180)
 }
 
-rotate_x :: proc(angle: f32) -> Mat4 {
+mat_rotate_x :: proc(angle: f32) -> Mat4 {
 	return Mat4{
 		1, 0, 0, 0,
 		0, math.cos(angle), -math.sin(angle), 0,
@@ -17,7 +17,7 @@ rotate_x :: proc(angle: f32) -> Mat4 {
 	}
 }
 
-rotate_y :: proc(angle: f32) -> Mat4 {
+mat_rotate_y :: proc(angle: f32) -> Mat4 {
 	return Mat4{
 		math.cos(angle), 0, math.sin(angle), 0,
 		0, 1, 0, 0,
@@ -26,7 +26,7 @@ rotate_y :: proc(angle: f32) -> Mat4 {
 	}
 }
 
-rotate_z :: proc(angle: f32) -> Mat4 {
+mat_rotate_z :: proc(angle: f32) -> Mat4 {
 	return Mat4{
 		math.cos(angle), -math.sin(angle), 0, 0,
 		math.sin(angle), math.cos(angle), 0, 0,
@@ -61,4 +61,13 @@ mat_rotate :: proc(angle: f32, vec: Vec3) -> Mat4 {
 	rot[3][3] = 1
 
 	return rot
+}
+
+mat_translate :: proc(vec: Vec3) -> Mat4 {
+	return {
+		1, 0, 0, vec.x,
+		0, 1, 0, vec.y,
+		0, 0, 1, vec.z,
+		0, 0, 0, 1
+	}
 }
