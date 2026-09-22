@@ -28,7 +28,7 @@ parse_vertex :: proc(line: string) -> (vertex: [3]f32, err: errors.Parsing_Error
 	return vertex, nil
 }
 
-parse_face :: proc(line: string) -> (face: []u32, err: errors.Parsing_Error) {
+parse_face :: proc(line: string, m: mesh.Mesh) -> (face: []u32, err: errors.Parsing_Error) {
 	tokens := strings.split(line, " ")
 	defer delete(tokens)
 
@@ -42,10 +42,18 @@ parse_face :: proc(line: string) -> (face: []u32, err: errors.Parsing_Error) {
 	face = make([]u32, len(tokens) - 1)
 	for token, i in tokens {
 		if i == 0 do continue
-		attribute, ok := strconv.parse_i64(token)
+		attribute, ok := strconv.parse_int(token)
 		if !ok {
 			delete(face)
 			return []u32{}, .Wrong_Format
+		}
+		switch {
+		case attribute == 0:
+			return []u32{}, .Zero_Face_Index
+		case attribute > len(m.vertices) || attribute < -len(m.vertices):
+			return []u32{}, .Out_Of_Bounds
+		case attribute < 0:
+			attribute = len(m.vertices) - attribute + 1
 		}
 		face[i - 1] = u32(attribute - 1)
 	}
@@ -77,7 +85,7 @@ parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
 			append(&m.vertices, ..vertex[:])
 		case 'f':
 			face: []u32
-			face, err = parse_face(normalized)
+			face, err = parse_face(normalized, m^)
 			if err != nil {
 				return err
 			}
