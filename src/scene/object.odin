@@ -1,6 +1,5 @@
 package scene
 
-import "core:math/linalg"
 import "../vmath"
 
 Object :: struct {

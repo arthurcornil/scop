@@ -1,6 +1,5 @@
 package scene
 
-import "core:math/linalg"
 import "../vmath"
 
 WORLD_UP :: vmath.Vec3{0.0, 1.0, 0.0}
@@ -22,11 +21,11 @@ make_cam :: proc(pos, target: vmath.Vec3) -> Camera {
 }
 
 get_view_mat :: proc(c: Camera) -> vmath.Mat4 {
-	return linalg.matrix4_look_at(c.pos, c.target, c.up)
+	return vmath.mat_look_at(c.pos, c.target, c.up)
 }
 
 get_proj_mat :: proc(c: Camera, aspect: f32) -> vmath.Mat4 {
-	return linalg.matrix4_perspective(
+	return vmath.mat_perspective(
 		c.fov,
 		aspect,
 		c.near,

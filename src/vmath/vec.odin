@@ -4,7 +4,7 @@ import "core:math"
 
 Vec3 :: [3]f32
 
-get_len :: proc(vec: Vec3) -> f32 {
+vec_len :: proc(vec: Vec3) -> f32 {
 	return math.sqrt(
 		vec[0] * vec[0] +
 		vec[1] * vec[1] +
@@ -12,13 +12,22 @@ get_len :: proc(vec: Vec3) -> f32 {
 	)
 }
 
-normalize :: proc(vec: Vec3) -> Vec3 {
-	len := get_len(vec)
-	if len == 0 do return Vec3{}
+vec_normalize :: proc(vec: Vec3) -> Vec3 {
+	return vec / vec_len(vec)
+}
 
-	vec := vec
-	vec[0] /= len
-	vec[1] /= len
-	vec[2] /= len
-	return vec
+vec_cross :: proc(a, b: Vec3) -> Vec3 {
+	return {
+		a[1] * b[2] - a[2] * b[1],
+		a[2] * b[0] - a[0] * b[2],
+		a[0] * b[1] - a[1] * b[0]
+	}
+}
+
+vec_dot :: proc(a, b: Vec3) -> f32 {
+	return (
+		a[0] * b[0] +
+		a[1] * b[1] +
+		a[2] * b[2]
+	)
 }

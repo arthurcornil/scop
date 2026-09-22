@@ -35,11 +35,11 @@ mat_rotate_z :: proc(angle: f32) -> Mat4 {
 	}
 }
 
-mat_rotate :: proc(angle: f32, vec: Vec3) -> Mat4 {
+mat_rotate :: proc(angle: f32, vec: Vec3) -> (Mat4) {
 	c := math.cos(angle)
 	s := math.sin(angle)
 
-	a := normalize(vec)
+	a := vec_normalize(vec)
 	t := a * (1-c)
 
 	rot: Mat4
@@ -70,4 +70,33 @@ mat_translate :: proc(vec: Vec3) -> Mat4 {
 		0, 0, 1, vec.z,
 		0, 0, 0, 1
 	}
+}
+
+mat_look_at :: proc(eye, target, worldUp: Vec3) -> Mat4 {
+	forward := vec_normalize(target - eye)
+	right := vec_normalize(vec_cross(forward, worldUp))
+	up := vec_cross(right, forward)
+
+	return {
+		right[0], right[1], right[2], -vec_dot(right, eye),
+		up[0], up[1], up[2], -vec_dot(up, eye),
+		-forward[0], -forward[1], -forward[2], vec_dot(forward, eye),
+		0, 0, 0, 1
+	}
+}
+
+mat_perspective :: proc(fovy, aspect, near, far: f32, flip_z_axis := true) -> (m: Mat4) {
+	tan_half_fovy := math.tan(0.5 * fovy)
+
+	m[0, 0] = 1 / (aspect * tan_half_fovy)
+	m[1, 1] = 1 / (tan_half_fovy)
+	m[2, 2] = (far + near) / (far - near)
+	m[3, 2] = 1
+	m[2, 3] = -2 * far * near / (far - near)
+
+	if flip_z_axis {
+		m[2] = -m[2]
+	}
+
+	return
 }
