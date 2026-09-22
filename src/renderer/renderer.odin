@@ -4,7 +4,7 @@ import gl "vendor:OpenGL"
 
 BACKGROUND_COLOR :: [4]f32{0.2, 0.3, 0.3, 1.0}
 
-destroy :: proc{gpu_mesh_destroy}
+destroy :: proc{gpu_mesh_destroy, program_destroy}
 
 @private
 get_color_attr :: proc(color: [4]f32) -> (r: f32, g: f32, b: f32, alpha: f32) {

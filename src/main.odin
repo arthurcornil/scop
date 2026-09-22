@@ -25,7 +25,8 @@ run :: proc(path: string) -> (err: errors.Error) {
 	defer renderer.destroy(&gpu_data)
 	mesh.destroy(&m)
 
-	shader := renderer.load_shader() or_return
+	shader := renderer.create_program() or_return
+	defer renderer.destroy(shader)
 
 	cam := scene.make_cam({0, 0, 10}, {0, 0, 0})
 	last := platform.time()
