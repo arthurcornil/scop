@@ -39,7 +39,7 @@ run :: proc(path: string) -> (err: errors.Error) {
 	shader := renderer.create_program() or_return
 	defer renderer.destroy(shader)
 
-	cam := scene.make_cam({0, 0, 7}, {0, 0, 0})
+	cam := scene.make_cam({0, 0, 10}, {0, 0, 0})
 	last := platform.time()
 
 	for !platform.should_close(win) {

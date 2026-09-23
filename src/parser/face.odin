@@ -109,14 +109,14 @@ parse_corners :: proc(tokens: []string, m: mesh.Mesh) -> (corners: []Face_Corner
 }
 
 @private
-create_vertices :: proc(corners: []Face_Corner, m: ^mesh.Mesh, unique_corners: ^map[Face_Corner]u32) ->
-	(indices: []u32, err: errors.Parsing_Error) {
+create_vertices :: proc(corners: []Face_Corner, m: ^mesh.Mesh, unique_corners: ^map[Face_Corner]u32, vertex_pos_ids: ^[dynamic]int) -> (indices: []u32) {
 	indices = make([]u32, len(corners))
 	for corner, i in corners {
 		index: u32
 		found: bool
 		if index, found = unique_corners[corner]; !found {
 			append(&m.vertices, face_corner_to_vertex(corner, m^))
+			append(vertex_pos_ids, corner.pos_id)
 			index = u32(len(m.vertices) - 1)
 			unique_corners[corner] = index
 		}
