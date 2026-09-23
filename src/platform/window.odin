@@ -27,15 +27,16 @@ init_window :: proc() -> (window: Window, err: errors.GLFW_Error) {
 	gl.load_up_to(GL_MAJOR, GL_MINOR, glfw.gl_set_proc_address)
 	gl.Enable(gl.DEPTH_TEST)
 	glfw.SetFramebufferSizeCallback(window, framebuffer_size_callback)
+	glfw.SetKeyCallback(window, key_callback)
 	return
 }
 
-process_input :: proc(window: Window) {
+poll_events :: proc(window: Window) {
+	input.pressed = {}
 	glfw.PollEvents()
-	if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
-		glfw.SetWindowShouldClose(window, true)
-	}
 }
+
+close :: proc(win: Window) { glfw.SetWindowShouldClose(win, true) }
 
 framebuffer_size_callback :: proc "c" (window: glfw.WindowHandle, width, height: i32) {
 	gl.Viewport(0, 0, width, height)

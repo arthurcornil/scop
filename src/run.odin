@@ -1,9 +1,5 @@
 package main
 
-import "core:fmt"
-
-import gl "vendor:OpenGL"
-
 import "./parser"
 import "./renderer"
 import "./mesh"
@@ -11,8 +7,23 @@ import "./errors"
 import "./platform"
 import "./scene"
 
+Visualiser :: struct {
+	rotate_model: bool
+}
+
+handle_inputs :: proc(win: platform.Window, vis: ^Visualiser) {
+	switch {
+	case platform.key_pressed(.Escape):
+		platform.close(win)
+	case platform.key_pressed(.Enter):
+		vis.rotate_model = !vis.rotate_model
+	}
+}
 
 run :: proc(path: string) -> (err: errors.Error) {
+	visualiser := Visualiser {
+		true
+	}
 	win := platform.init_window() or_return
 	defer platform.destroy(win)
 
@@ -28,14 +39,17 @@ run :: proc(path: string) -> (err: errors.Error) {
 	shader := renderer.create_program() or_return
 	defer renderer.destroy(shader)
 
-	cam := scene.make_cam({0, 0, 2}, {0, 0, 0})
+	cam := scene.make_cam({0, 0, 7}, {0, 0, 0})
 	last := platform.time()
 
 	for !platform.should_close(win) {
-		platform.process_input(win)
+		platform.poll_events(win)
+		handle_inputs(win, &visualiser)
 
 		now := platform.time()
-		scene.update(&obj, f32(now - last))
+		if visualiser.rotate_model {
+			scene.update(&obj, f32(now - last))
+		}
 		last = now
 
 		renderer.begin_frame()
