@@ -1,5 +1,7 @@
 package main
 
+import "core:fmt"
+
 import gl "vendor:OpenGL"
 
 import "./parser"
@@ -15,8 +17,8 @@ run :: proc(path: string) -> (err: errors.Error) {
 	defer platform.destroy(win)
 
 	m := mesh.Mesh{}
-	defer mesh.destroy(&m)
 	parser.parse(path, &m) or_return
+
 	obj := scene.Object{center = mesh.center(m)}
 
 	gpu_data := renderer.upload(&m)
@@ -26,7 +28,7 @@ run :: proc(path: string) -> (err: errors.Error) {
 	shader := renderer.create_program() or_return
 	defer renderer.destroy(shader)
 
-	cam := scene.make_cam({0, 0, 10}, {0, 0, 0})
+	cam := scene.make_cam({0, 0, 2}, {0, 0, 0})
 	last := platform.time()
 
 	for !platform.should_close(win) {

@@ -29,7 +29,7 @@ draw_mesh :: proc(s: Shader, g: GPU_Mesh, model, view, proj: matrix[4, 4]f32) {
 	gl.UniformMatrix4fv(s.u_view, 1, gl.FALSE, &view[0][0])
 	gl.UniformMatrix4fv(s.u_proj, 1, gl.FALSE, &proj[0][0])
 
-	//gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	gl.Enable(gl.CULL_FACE);  
 	gl.BindVertexArray(g.vao)
 	defer gl.BindVertexArray(0)

@@ -1,22 +1,33 @@
 package mesh
 
+Vertex :: struct {
+	pos: [3]f32,
+	normal: [3]f32,
+	textcoords: [2]f32
+}
+
 Mesh :: struct {
-	vertices: [dynamic]f32,
+	raw_vertices: [dynamic][3]f32,
 	indices: [dynamic]u32,
+	normals: [dynamic][3]f32,
+	textcoords: [dynamic][2]f32,
+	vertices: [dynamic]Vertex
 }
 
 destroy :: proc(m: ^Mesh) {
+	delete(m.raw_vertices)
 	delete(m.vertices)
 	delete(m.indices)
+	delete(m.normals)
+	delete(m.textcoords)
 	m^ = {}
 }
 
 center :: proc(m: Mesh) -> (center_vec: [3]f32) {
-	lowest := [3]f32{m.vertices[0], m.vertices[1], m.vertices[2]}
+	lowest := m.raw_vertices[0]
 	highest := lowest
 
-	for i := 3; i < len(m.vertices); i += 3 {
-		vertex := [3]f32{m.vertices[i], m.vertices[i + 1], m.vertices[i + 2]}
+	for vertex in m.raw_vertices {
 		for coord, j in vertex {
 			if coord < lowest[j] {
 				lowest[j] = coord

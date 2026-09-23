@@ -11,7 +11,7 @@ Shader_Error :: enum {
 
 Parsing_Error :: enum {
 	None = 0,
-	Not_A_Vertex,
+	Wrong_Tag,
 	Wrong_Format,
 	Wrong_Number_Of_Attributes,
 	Not_A_Face,
@@ -49,6 +49,8 @@ report :: proc(err: Error) {
 	case Parsing_Error:
 		error_type = "Parsing Error"
 		#partial switch e {
+		case .Wrong_Tag:
+			details = "Wrong tag"
 		case .Wrong_Format:
 			details = "Format Error"
 		case .Wrong_Number_Of_Attributes:

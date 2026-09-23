@@ -7,52 +7,20 @@ import "core:strconv"
 import "../mesh"
 import "../errors"
 
-parse_vertex :: proc(tokens: []string) -> (vertex: [3]f32, err: errors.Parsing_Error) {
-	if tokens[0] != "v" {
-		return [3]f32{}, .Not_A_Vertex
-	}
+@private
+parse_float_attr :: proc(tokens: []string) -> (values: [3]f32, err: errors.Parsing_Error) {
 	if len(tokens) != 4 {
-		return [3]f32{}, .Wrong_Number_Of_Attributes
+		return {}, .Wrong_Number_Of_Attributes
 	}
 	for token, i in tokens {
 		if i == 0 do continue
 		attribute, ok := strconv.parse_f32(token)
 		if !ok {
-			return [3]f32{}, .Wrong_Format
+			return {}, .Wrong_Format
 		}
-		vertex[i - 1] = attribute
+		values[i - 1] = attribute
 	}
-	return vertex, nil
-}
-
-parse_face :: proc(tokens: []string, m: mesh.Mesh) -> (face: []u32, err: errors.Parsing_Error) {
-	if tokens[0] != "f" {
-		return []u32{}, .Not_A_Face
-	}
-	if len(tokens) < 4 {
-		return []u32{}, .Wrong_Number_Of_Attributes
-	}
-
-	face = make([]u32, len(tokens) - 1)
-	for token, i in tokens {
-		if i == 0 do continue
-		attribute, ok := strconv.parse_int(token)
-		if !ok {
-			delete(face)
-			return []u32{}, .Wrong_Format
-		}
-		vertex_count := len(m.vertices) / 3
-		switch {
-		case attribute == 0:
-			return []u32{}, .Zero_Face_Index
-		case attribute > vertex_count || attribute < -vertex_count:
-			return []u32{}, .Out_Of_Bounds
-		case attribute < 0:
-			attribute = vertex_count + attribute + 1
-		}
-		face[i - 1] = u32(attribute - 1)
-	}
-	return face, nil
+	return values, nil
 }
 
 parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
@@ -63,8 +31,11 @@ parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
 		return err
 	}
 
+	unique_corners: map[Face_Corner]u32
+	defer delete(unique_corners)
 	content := string(data)
 	for line in strings.split_lines_iterator(&content) {
+		//Might wanna switch to strings field_iterator() instead fields()
 		tokens := strings.fields(line)
 		defer delete(tokens)
 		if len(tokens) == 0 {
@@ -73,16 +44,23 @@ parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
 		switch tokens[0] {
 		case "#":
 			continue
-		//TODO: handle vn, ...
 		case "v":
-			vertex := parse_vertex(tokens) or_return
-			append(&m.vertices, ..vertex[:])
+			vertex := parse_float_attr(tokens) or_return
+			append(&m.raw_vertices, vertex)
+		case "vn":
+			normal := parse_float_attr(tokens) or_return
+			append(&m.normals, normal)
+		case "vt":
+			textcoord := parse_textcoord(tokens) or_return
+			append(&m.textcoords, textcoord)
 		case "f":
-			face := parse_face(tokens, m^) or_return
-			for i in 1..<len(face) - 1 {
-				append(&m.indices, face[0], face[i], face[i + 1])
+			corners := parse_corners(tokens, m^) or_return
+			indices := create_vertices(corners, m, &unique_corners) or_return
+			delete(corners)
+			for i in 1..<len(indices) - 1 {
+				append(&m.indices, indices[0], indices[i], indices[i + 1])
 			}
-			delete(face)
+			delete(indices)
 		}
 	}
 	return nil

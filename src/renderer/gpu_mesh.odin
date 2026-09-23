@@ -17,7 +17,7 @@ upload :: proc(m: ^mesh.Mesh) -> (g: GPU_Mesh) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, g.vbo)
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
-		size_of(f32) * len(m.vertices),
+		size_of(mesh.Vertex) * len(m.vertices),
 		raw_data(m.vertices),
 		gl.STATIC_DRAW
 	)
@@ -31,8 +31,12 @@ upload :: proc(m: ^mesh.Mesh) -> (g: GPU_Mesh) {
 		gl.STATIC_DRAW
 	)
 
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * size_of(f32), 0)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, size_of(mesh.Vertex), 0)
 	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, size_of(mesh.Vertex), 3 * size_of(f32))
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, size_of(mesh.Vertex), 6 * size_of(f32))
+	gl.EnableVertexAttribArray(2)
 	gl.BindVertexArray(0)
 	g.count_indices = i32(len(m.indices))
 	return
