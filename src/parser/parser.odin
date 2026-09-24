@@ -45,10 +45,10 @@ workout_normals :: proc(m: ^mesh.Mesh, vertex_pos_ids: [dynamic]int) {
 parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
 	data: []u8
 	data, err = os.read_entire_file(file_name, context.allocator)
-	defer delete(data)
 	if err != nil {
 		return err
 	}
+	defer delete(data)
 
 	unique_corners: map[Face_Corner]u32
 	defer delete(unique_corners)

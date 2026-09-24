@@ -13,12 +13,17 @@ SCREEN_WIDTH :: 800
 SCREEN_HEIGHT :: 600
 
 init_window :: proc() -> (window: Window, err: errors.GLFW_Error) {
+	when ODIN_OS == .Darwin {
+		glfw.InitHint(glfw.COCOA_CHDIR_RESOURCES, 0)
+	}
 	if !glfw.Init() do return nil, .Init_Error
 
 	glfw.WindowHint(glfw.CONTEXT_VERSION_MAJOR, GL_MAJOR)
 	glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR, GL_MINOR)
 	glfw.WindowHint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
-	glfw.WindowHint(glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE)
+	when ODIN_OS == .Darwin {
+		glfw.WindowHint(glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE)
+	}
 
 	window = glfw.CreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "scop", nil, nil)
 	if window == nil do return nil, .Window_Error

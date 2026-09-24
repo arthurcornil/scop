@@ -21,7 +21,7 @@ Environment :: struct {
 init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
 	m := mesh.Mesh{}
 	if err = parser.parse(path, &m); err != nil {
-		return {}, nil
+		return {}, err
 	}
 
 	center := mesh.center(m)
