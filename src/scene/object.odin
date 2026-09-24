@@ -4,10 +4,12 @@ import "../vmath"
 
 Object :: struct {
 	center: vmath.Vec3,
-	angle: f32
+	angle: f32,
+	is_rotating: bool
 }
 
 update :: proc(o: ^Object, dt: f32) {
+	if (!o.is_rotating) do return 
 	o.angle += dt * 0.8
 }
 

@@ -1,5 +1,7 @@
 package mesh
 
+import "../vmath"
+
 Vertex :: struct {
 	pos: [3]f32,
 	normal: [3]f32,
@@ -39,4 +41,11 @@ center :: proc(m: Mesh) -> (center_vec: [3]f32) {
 	}
 	center_vec = (lowest + highest) / 2
 	return 
+}
+
+radius :: proc(center: vmath.Vec3, m: Mesh) -> (radius: f32) {
+	for v in m.raw_vertices {
+		radius = max(radius, vmath.vec_len(v - center))
+	}
+	return
 }

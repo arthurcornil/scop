@@ -1,5 +1,6 @@
 package scene
 
+import "core:math"
 import "../vmath"
 
 WORLD_UP :: vmath.Vec3{0.0, 1.0, 0.0}
@@ -9,14 +10,17 @@ Camera :: struct {
 	fov, near, far: f32
 }
 
-make_cam :: proc(pos, target: vmath.Vec3) -> Camera {
+make_cam :: proc(radius: f32) -> Camera {
+	fov := vmath.to_radians(f32(45))
+	dist := radius / math.sin(fov / 2) * 1.15
+	pos: vmath.Vec3 = {0, 0, dist}
 	return Camera{
 		pos    = pos,
-		target = target,
+		target = {0, 0, 0},
 		up     = WORLD_UP,
-		fov    = vmath.to_radians(f32(45)),
-		near   = 0.1,
-		far    = 100,
+		fov    = fov,
+		near   = max(dist - radius * 1.5, radius * 0.01),
+		far    = dist + radius * 1.5,
 	}
 }
 

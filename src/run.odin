@@ -7,58 +7,68 @@ import "./errors"
 import "./platform"
 import "./scene"
 
-Visualiser :: struct {
-	rotate_model: bool
+Environment :: struct {
+	model: scene.Object,
+	camera: scene.Camera,
+	gpu_mesh: renderer.GPU_Mesh,
+	shader: renderer.Shader
 }
 
-handle_inputs :: proc(win: platform.Window, vis: ^Visualiser) {
+init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
+	m := mesh.Mesh{}
+	if err = parser.parse(path, &m); err != nil {
+		return {}, nil
+	}
+
+	center := mesh.center(m)
+	radius := mesh.radius(center, m)
+	env.model = scene.Object{center = center, is_rotating = true}
+
+	env.gpu_mesh = renderer.upload(&m)
+	mesh.destroy(&m)
+
+	if env.shader, err = renderer.create_program(); err != nil {
+		return {}, err
+	}
+
+	env.camera = scene.make_cam(radius)
+	return
+}
+
+handle_inputs :: proc(win: platform.Window, env: ^Environment) {
 	switch {
 	case platform.key_pressed(.Escape):
 		platform.close(win)
 	case platform.key_pressed(.Enter):
-		vis.rotate_model = !vis.rotate_model
+		env.model.is_rotating = !env.model.is_rotating
 	}
 }
 
 run :: proc(path: string) -> (err: errors.Error) {
-	visualiser := Visualiser {
-		true
-	}
 	win := platform.init_window() or_return
 	defer platform.destroy(win)
 
-	m := mesh.Mesh{}
-	parser.parse(path, &m) or_return
+	env := init_env(path) or_return
+	defer renderer.destroy(&env.gpu_mesh)
+	defer renderer.destroy(env.shader)
 
-	obj := scene.Object{center = mesh.center(m)}
-
-	gpu_data := renderer.upload(&m)
-	defer renderer.destroy(&gpu_data)
-	mesh.destroy(&m)
-
-	shader := renderer.create_program() or_return
-	defer renderer.destroy(shader)
-
-	cam := scene.make_cam({0, 0, 10}, {0, 0, 0})
 	last := platform.time()
 
 	for !platform.should_close(win) {
 		platform.poll_events(win)
-		handle_inputs(win, &visualiser)
+		handle_inputs(win, &env)
 
 		now := platform.time()
-		if visualiser.rotate_model {
-			scene.update(&obj, f32(now - last))
-		}
+		scene.update(&env.model, f32(now - last))
 		last = now
 
 		renderer.begin_frame()
 		renderer.draw_mesh(
-			shader,
-			gpu_data,
-			scene.get_model_mat(obj),
-			scene.get_view_mat(cam),
-			scene.get_proj_mat(cam, platform.aspect(win))
+			env.shader,
+			env.gpu_mesh,
+			scene.get_model_mat(env.model),
+			scene.get_view_mat(env.camera),
+			scene.get_proj_mat(env.camera, platform.aspect(win))
 		)
 		platform.swap_buffers(win)
 	}
