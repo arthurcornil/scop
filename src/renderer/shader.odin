@@ -7,7 +7,7 @@ import gl "vendor:OpenGL"
 
 Shader :: struct {
 	id: u32,
-	u_model, u_view, u_proj: i32
+	u_model, u_view, u_proj, u_light_pos: i32
 }
 
 // Simpler Odin way with load_shaders_source() helper
@@ -87,6 +87,7 @@ create_program :: proc() -> (s: Shader, err: errors.Error) {
 	s.u_model = gl.GetUniformLocation(s.id, "model")
 	s.u_view = gl.GetUniformLocation(s.id, "view")
 	s.u_proj = gl.GetUniformLocation(s.id, "projection")
+	s.u_light_pos = gl.GetUniformLocation(s.id, "light_pos")
 	return
 }
 

@@ -9,7 +9,7 @@ Object :: struct {
 	is_rotating: bool
 }
 
-update :: proc(o: ^Object, dt: f32) {
+update_obj :: proc(o: ^Object, dt: f32) {
 	if (!o.is_rotating) do return 
 		o.yaw += dt * 0.8
 }

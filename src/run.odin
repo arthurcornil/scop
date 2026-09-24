@@ -8,10 +8,12 @@ import "./mesh"
 import "./errors"
 import "./platform"
 import "./scene"
+import "./vmath"
 
 Environment :: struct {
 	model: scene.Object,
 	camera: scene.Camera,
+	light: scene.Light_Source,
 	gpu_mesh: renderer.GPU_Mesh,
 	shader: renderer.Shader
 }
@@ -26,14 +28,15 @@ init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
 	radius := mesh.radius(center, m)
 	env.model = scene.Object{center = center, is_rotating = true}
 
+	env.camera = scene.make_cam(radius)
+	env.light = scene.make_light(radius)
+
 	env.gpu_mesh = renderer.upload(&m)
 	mesh.destroy(&m)
 
 	if env.shader, err = renderer.create_program(); err != nil {
 		return {}, err
 	}
-
-	env.camera = scene.make_cam(radius)
 	return
 }
 
@@ -65,6 +68,7 @@ run :: proc(path: string) -> (err: errors.Error) {
 
 		now := platform.time()
 		scene.update(&env.model, f32(now - last))
+		scene.update(&env.light, env.camera)
 		last = now
 
 		renderer.begin_frame()
@@ -73,7 +77,8 @@ run :: proc(path: string) -> (err: errors.Error) {
 			env.gpu_mesh,
 			scene.get_model_mat(env.model),
 			scene.get_view_mat(env.camera),
-			scene.get_proj_mat(env.camera, platform.aspect(win))
+			scene.get_proj_mat(env.camera, platform.aspect(win)),
+			env.light.view_pos
 		)
 		platform.swap_buffers(win)
 	}

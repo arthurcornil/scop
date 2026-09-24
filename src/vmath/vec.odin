@@ -3,6 +3,7 @@ package vmath
 import "core:math"
 
 Vec3 :: [3]f32
+Vec4 :: [4]f32
 
 vec_len :: proc(vec: Vec3) -> f32 {
 	return math.sqrt(

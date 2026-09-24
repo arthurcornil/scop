@@ -20,14 +20,15 @@ begin_frame :: proc() {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 }
 
-draw_mesh :: proc(s: Shader, g: GPU_Mesh, model, view, proj: matrix[4, 4]f32) {
-	model, view, proj := model, view, proj
+draw_mesh :: proc(s: Shader, g: GPU_Mesh, model, view, proj: matrix[4, 4]f32, light_pos: [4]f32) {
+	model, view, proj, light_pos := model, view, proj, light_pos
 
 	gl.UseProgram(s.id)
 
 	gl.UniformMatrix4fv(s.u_model, 1, gl.FALSE, &model[0][0])
 	gl.UniformMatrix4fv(s.u_view, 1, gl.FALSE, &view[0][0])
 	gl.UniformMatrix4fv(s.u_proj, 1, gl.FALSE, &proj[0][0])
+	gl.Uniform4fv(s.u_light_pos, 1, &light_pos[0])
 
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	gl.Enable(gl.CULL_FACE);  
