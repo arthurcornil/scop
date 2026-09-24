@@ -24,6 +24,21 @@ make_cam :: proc(radius: f32) -> Camera {
 	}
 }
 
+orbit :: proc(c: ^Camera, delta: [2]f32) {
+      offset := c.pos - c.target
+      radius := vmath.vec_len(offset)
+
+      yaw := math.atan2(offset.x, offset.z) - delta[0] * 0.01
+      pitch := math.asin(offset.y / radius) + delta[1] * 0.01
+      pitch = clamp(pitch, -math.PI/2 + 0.01, math.PI/2 - 0.01)
+
+      c.pos = c.target + vmath.Vec3{
+              radius * math.cos(pitch) * math.sin(yaw),
+              radius * math.sin(pitch),
+              radius * math.cos(pitch) * math.cos(yaw),
+      }
+}
+
 get_view_mat :: proc(c: Camera) -> vmath.Mat4 {
 	return vmath.mat_look_at(c.pos, c.target, c.up)
 }

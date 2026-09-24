@@ -1,5 +1,7 @@
 package main
 
+import "core:fmt"
+
 import "./parser"
 import "./renderer"
 import "./mesh"
@@ -41,6 +43,9 @@ handle_inputs :: proc(win: platform.Window, env: ^Environment) {
 		platform.close(win)
 	case platform.key_pressed(.Enter):
 		env.model.is_rotating = !env.model.is_rotating
+	}
+	if delta, ok := platform.mouse_drag_delta().?; ok {
+		scene.orbit(&env.camera, ([2]f32)(delta))
 	}
 }
 

@@ -1,5 +1,6 @@
 package platform
 
+import "core:fmt"
 import "vendor:glfw"
 import gl "vendor:OpenGL"
 
@@ -26,13 +27,16 @@ init_window :: proc() -> (window: Window, err: errors.GLFW_Error) {
 	glfw.SwapInterval(1)
 	gl.load_up_to(GL_MAJOR, GL_MINOR, glfw.gl_set_proc_address)
 	gl.Enable(gl.DEPTH_TEST)
+
 	glfw.SetFramebufferSizeCallback(window, framebuffer_size_callback)
 	glfw.SetKeyCallback(window, key_callback)
+	glfw.SetCursorPosCallback(window, cursor_callback)
+	glfw.SetMouseButtonCallback(window, mouse_button_callback)
 	return
 }
 
 poll_events :: proc(window: Window) {
-	input.pressed = {}
+	update_input()
 	glfw.PollEvents()
 }
 
