@@ -15,8 +15,6 @@ Environment :: struct {
 	camera: scene.Camera,
 	light: scene.Light_Source,
 	gpu_data: renderer.Data
-	// gpu_mesh: renderer.GPU_Mesh,
-	// shader: renderer.Shader
 }
 
 init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
