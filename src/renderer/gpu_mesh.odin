@@ -9,7 +9,7 @@ GPU_Mesh :: struct {
 	count_indices: i32
 }
 
-upload :: proc(m: ^mesh.Mesh) -> (g: GPU_Mesh) {
+upload :: proc(vertices: []mesh.Vertex, indices: []u32) -> (g: GPU_Mesh) {
 	gl.GenVertexArrays(1, &g.vao)
 	gl.BindVertexArray(g.vao)
 
@@ -17,8 +17,8 @@ upload :: proc(m: ^mesh.Mesh) -> (g: GPU_Mesh) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, g.vbo)
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
-		size_of(mesh.Vertex) * len(m.vertices),
-		raw_data(m.vertices),
+		size_of(mesh.Vertex) * len(vertices),
+		raw_data(vertices),
 		gl.STATIC_DRAW
 	)
 
@@ -26,8 +26,8 @@ upload :: proc(m: ^mesh.Mesh) -> (g: GPU_Mesh) {
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, g.ebo)
 	gl.BufferData(
 		gl.ELEMENT_ARRAY_BUFFER,
-		size_of(u32) * len(m.indices),
-		raw_data(m.indices),
+		size_of(u32) * len(indices),
+		raw_data(indices),
 		gl.STATIC_DRAW
 	)
 
@@ -38,7 +38,7 @@ upload :: proc(m: ^mesh.Mesh) -> (g: GPU_Mesh) {
 	gl.VertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, size_of(mesh.Vertex), 6 * size_of(f32))
 	gl.EnableVertexAttribArray(2)
 	gl.BindVertexArray(0)
-	g.count_indices = i32(len(m.indices))
+	g.count_indices = i32(len(indices))
 	return
 }
 

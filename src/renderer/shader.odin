@@ -53,14 +53,11 @@ compile_shader :: proc(src: cstring, shader_type: u32) -> (id: u32, err: errors.
 	return
 }
 
-create_program :: proc() -> (s: Shader, err: errors.Error) {
-	vertex_shader_src := cstring(#load("../shaders/vertex.glsl"))
-	fragment_shader_src := cstring(#load("../shaders/fragment.glsl"))
-
-	vertex := compile_shader(vertex_shader_src, gl.VERTEX_SHADER) or_return
+create_program :: proc(vertex_src, fragment_src: cstring) -> (s: Shader, err: errors.Error) {
+	vertex := compile_shader(vertex_src, gl.VERTEX_SHADER) or_return
 	defer gl.DeleteShader(vertex)
 
-	fragment := compile_shader(fragment_shader_src, gl.FRAGMENT_SHADER) or_return
+	fragment := compile_shader(fragment_src, gl.FRAGMENT_SHADER) or_return
 	defer gl.DeleteShader(fragment)
 
 	s.id = gl.CreateProgram()

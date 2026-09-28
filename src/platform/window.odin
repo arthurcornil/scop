@@ -32,6 +32,7 @@ init_window :: proc() -> (window: Window, err: errors.GLFW_Error) {
 	glfw.SwapInterval(1)
 	gl.load_up_to(GL_MAJOR, GL_MINOR, glfw.gl_set_proc_address)
 	gl.Enable(gl.DEPTH_TEST)
+	gl.Enable(gl.CULL_FACE);
 
 	glfw.SetFramebufferSizeCallback(window, framebuffer_size_callback)
 	glfw.SetKeyCallback(window, key_callback)

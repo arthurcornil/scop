@@ -4,7 +4,8 @@ import "../vmath"
 
 Light_Source :: struct {
 	world_pos: vmath.Vec3,
-	view_pos: vmath.Vec4
+	view_pos: vmath.Vec4,
+	size: f32
 }
 
 @private
@@ -18,8 +19,15 @@ update_light :: proc(l: ^Light_Source, c: Camera) {
 	l.view_pos = get_light_view(c, l.world_pos)
 }
 
-
 make_light :: proc(radius: f32) -> (light: Light_Source) {
 	light.world_pos = {radius * 1.8, radius * 2.5, radius * 2}
+	light.size = 0.05 * radius
 	return
+}
+
+get_model_mat_light :: proc(ls: Light_Source) -> vmath.Mat4 {
+	return (
+		vmath.mat_translate(ls.world_pos) *
+		vmath.mat_scale({ls.size, ls.size, ls.size})
+	)
 }

@@ -14,8 +14,9 @@ Environment :: struct {
 	model: scene.Object,
 	camera: scene.Camera,
 	light: scene.Light_Source,
-	gpu_mesh: renderer.GPU_Mesh,
-	shader: renderer.Shader
+	gpu_data: renderer.Data
+	// gpu_mesh: renderer.GPU_Mesh,
+	// shader: renderer.Shader
 }
 
 init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
@@ -31,12 +32,10 @@ init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
 	env.camera = scene.make_cam(radius)
 	env.light = scene.make_light(radius)
 
-	env.gpu_mesh = renderer.upload(&m)
-	mesh.destroy(&m)
-
-	if env.shader, err = renderer.create_program(); err != nil {
+	if env.gpu_data, err = renderer.init_data(&m); err != nil {
 		return {}, err
 	}
+	mesh.destroy(&m)
 	return
 }
 
@@ -57,8 +56,7 @@ run :: proc(path: string) -> (err: errors.Error) {
 	defer platform.destroy(win)
 
 	env := init_env(path) or_return
-	defer renderer.destroy(&env.gpu_mesh)
-	defer renderer.destroy(env.shader)
+	defer renderer.destroy(&env.gpu_data)
 
 	last := platform.time()
 
@@ -72,12 +70,20 @@ run :: proc(path: string) -> (err: errors.Error) {
 		last = now
 
 		renderer.begin_frame()
-		renderer.draw_mesh(
-			env.shader,
-			env.gpu_mesh,
+		obj_trans_pipeline := renderer.Trans_Pipeline{
 			scene.get_model_mat(env.model),
 			scene.get_view_mat(env.camera),
 			scene.get_proj_mat(env.camera, platform.aspect(win)),
+		}
+		light_trans_pipeline := renderer.Trans_Pipeline{
+			scene.get_model_mat(env.light),
+			scene.get_view_mat(env.camera),
+			scene.get_proj_mat(env.camera, platform.aspect(win))
+		}
+		renderer.draw_scene(
+			env.gpu_data,
+			obj_trans_pipeline,
+			light_trans_pipeline,
 			env.light.view_pos
 		)
 		platform.swap_buffers(win)

@@ -19,8 +19,8 @@ make_cam :: proc(radius: f32) -> Camera {
 		target = {0, 0, 0},
 		up     = WORLD_UP,
 		fov    = fov,
-		near   = max(dist - radius * 1.5, radius * 0.01),
-		far    = dist + radius * 1.5,
+		near   = 0.01,
+		far    = 60000
 	}
 }
 

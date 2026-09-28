@@ -2,9 +2,45 @@ package renderer
 
 import gl "vendor:OpenGL"
 
-BACKGROUND_COLOR :: [4]f32{0.1, 0.1, 0.1, 1.0}
+import "../mesh"
+import "../errors"
+import "../vmath"
 
-destroy :: proc{gpu_mesh_destroy, program_destroy}
+BACKGROUND_COLOR :: [4]f32{0.1, 0.1, 0.1, 1.0}
+VERTEX_SRC :: #load("../shaders/vertex.glsl", cstring)
+LIT_FRAGMENT_SRC :: #load("../shaders/lit_fragment.glsl", cstring)
+DEFAULT_FRAGMENT_SRC :: #load("../shaders/default_fragment.glsl", cstring)
+Trans_Pipeline :: struct {
+	model: vmath.Mat4,
+	view: vmath.Mat4,
+	projection: vmath.Mat4,
+}
+
+Data :: struct {
+	lit_shader: Shader,
+	default_shader: Shader,
+	obj_mesh: GPU_Mesh,
+	light_marker_mesh: GPU_Mesh,
+}
+
+init_data :: proc(m: ^mesh.Mesh) -> (data: Data, err: errors.Error) {
+	data.obj_mesh = upload(m.vertices[:], m.indices[:])
+	if data.lit_shader, err = create_program(VERTEX_SRC, LIT_FRAGMENT_SRC); err != nil {
+		return {}, err
+	}
+	data.light_marker_mesh = upload(LIGHT_MARKER_VERTICES[:], LIGHT_MARKER_INDICES[:])
+	if data.default_shader, err = create_program(VERTEX_SRC, DEFAULT_FRAGMENT_SRC); err != nil {
+		return {}, err
+	}
+	return
+}
+
+destroy :: proc(d: ^Data) {
+	gpu_mesh_destroy(&d.obj_mesh)
+	gpu_mesh_destroy(&d.light_marker_mesh)
+	program_destroy(d.lit_shader)
+	program_destroy(d.default_shader)
+}
 
 @private
 get_color_attr :: proc(color: [4]f32) -> (r: f32, g: f32, b: f32, alpha: f32) {
@@ -20,19 +56,29 @@ begin_frame :: proc() {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 }
 
-draw_mesh :: proc(s: Shader, g: GPU_Mesh, model, view, proj: matrix[4, 4]f32, light_pos: [4]f32) {
-	model, view, proj, light_pos := model, view, proj, light_pos
+draw_scene :: proc(d: Data, obj_trans: Trans_Pipeline, light_trans: Trans_Pipeline, light_pos: [4]f32) {
+	model, view, proj := obj_trans.model, obj_trans.view, obj_trans.projection
+	light_pos := light_pos
 
-	gl.UseProgram(s.id)
+	gl.UseProgram(d.lit_shader.id)
 
-	gl.UniformMatrix4fv(s.u_model, 1, gl.FALSE, &model[0][0])
-	gl.UniformMatrix4fv(s.u_view, 1, gl.FALSE, &view[0][0])
-	gl.UniformMatrix4fv(s.u_proj, 1, gl.FALSE, &proj[0][0])
-	gl.Uniform4fv(s.u_light_pos, 1, &light_pos[0])
+	gl.UniformMatrix4fv(d.lit_shader.u_model, 1, gl.FALSE, &model[0][0])
+	gl.UniformMatrix4fv(d.lit_shader.u_view, 1, gl.FALSE, &view[0][0])
+	gl.UniformMatrix4fv(d.lit_shader.u_proj, 1, gl.FALSE, &proj[0][0])
+	gl.Uniform4fv(d.lit_shader.u_light_pos, 1, &light_pos[0])
 
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
-	gl.Enable(gl.CULL_FACE);  
-	gl.BindVertexArray(g.vao)
+	gl.BindVertexArray(d.obj_mesh.vao)
 	defer gl.BindVertexArray(0)
-	gl.DrawElements(gl.TRIANGLES, g.count_indices, gl.UNSIGNED_INT, nil)
+	gl.DrawElements(gl.TRIANGLES, d.obj_mesh.count_indices, gl.UNSIGNED_INT, nil)
+
+	model, view, proj = light_trans.model, light_trans.view, light_trans.projection
+	gl.UseProgram(d.default_shader.id)
+
+	gl.UniformMatrix4fv(d.default_shader.u_model, 1, gl.FALSE, &model[0][0])
+	gl.UniformMatrix4fv(d.default_shader.u_view, 1, gl.FALSE, &view[0][0])
+	gl.UniformMatrix4fv(d.default_shader.u_proj, 1, gl.FALSE, &proj[0][0])
+
+	gl.BindVertexArray(d.light_marker_mesh.vao)
+	gl.DrawElements(gl.TRIANGLES, d.light_marker_mesh.count_indices, gl.UNSIGNED_INT, nil)
 }

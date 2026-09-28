@@ -72,6 +72,15 @@ mat_translate :: proc(vec: Vec3) -> Mat4 {
 	}
 }
 
+mat_scale :: proc(vec: Vec3) -> Mat4 {
+	return {
+		vec.x, 0, 0, 0,
+		0, vec.y, 0, 0,
+		0, 0, vec.z, 0,
+		0, 0, 0, 1
+	}
+}
+
 mat_look_at :: proc(eye, target, worldUp: Vec3) -> Mat4 {
 	forward := vec_normalize(target - eye)
 	right := vec_normalize(vec_cross(forward, worldUp))

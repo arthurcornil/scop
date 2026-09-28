@@ -14,7 +14,7 @@ update_obj :: proc(o: ^Object, dt: f32) {
 		o.yaw += dt * 0.8
 }
 
-get_model_mat :: proc(o: Object) -> vmath.Mat4 {
+get_model_mat_obj :: proc(o: Object) -> vmath.Mat4 {
 	return (
 		vmath.mat_rotate_y(o.yaw) *
 		vmath.mat_rotate_x(o.pitch) *
