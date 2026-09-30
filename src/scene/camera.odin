@@ -7,7 +7,7 @@ WORLD_UP :: vmath.Vec3{0.0, 1.0, 0.0}
 
 Camera :: struct {
 	pos, target, up : vmath.Vec3,
-	fov, near, far: f32
+	fov, near, far, radius: f32
 }
 
 make_cam :: proc(radius: f32) -> Camera {
@@ -19,6 +19,7 @@ make_cam :: proc(radius: f32) -> Camera {
 		target = {0, 0, 0},
 		up     = WORLD_UP,
 		fov    = fov,
+		radius = radius,
 		near   = max(dist - radius * 4, radius * 0.01),
 		far    = dist + radius * 1.5,
 	}
@@ -37,6 +38,15 @@ orbit :: proc(c: ^Camera, delta: [2]f32) {
               radius * math.sin(pitch),
               radius * math.cos(pitch) * math.cos(yaw),
       }
+}
+
+zoom :: proc(c: ^Camera, scroll: f32) {
+      offset := c.pos - c.target
+      dist := vmath.vec_len(offset)
+      new_dist := dist * math.pow(0.9, scroll)
+      c.pos = c.target + offset * (new_dist / dist)
+      c.near = max(new_dist - c.radius * 4, c.radius * 0.01)
+      c.far  = new_dist + c.radius * 1.5
 }
 
 get_view_mat :: proc(c: Camera) -> vmath.Mat4 {

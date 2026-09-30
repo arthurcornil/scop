@@ -38,6 +38,7 @@ init_window :: proc() -> (window: Window, err: errors.GLFW_Error) {
 	glfw.SetKeyCallback(window, key_callback)
 	glfw.SetCursorPosCallback(window, cursor_callback)
 	glfw.SetMouseButtonCallback(window, mouse_button_callback)
+	glfw.SetScrollCallback(window, scroll_callback)
 	return
 }
 

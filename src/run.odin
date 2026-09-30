@@ -47,6 +47,9 @@ handle_inputs :: proc(win: platform.Window, env: ^Environment) {
 	if delta, ok := platform.mouse_drag_delta().?; ok {
 		scene.orbit(&env.camera, ([2]f32)(delta))
 	}
+	if scroll_delta := platform.scroll_delta(); scroll_delta != 0 {
+		scene.zoom(&env.camera, f32(scroll_delta))
+	}
 }
 
 run :: proc(path: string) -> (err: errors.Error) {

@@ -14,7 +14,8 @@ Input :: struct {
 	mouse_down: bool,
 	cursor_pos: [2]f64,
 	cursor_delta: [2]f64,
-	last_cursor: [2]f64
+	last_cursor: [2]f64,
+	scroll_offset: f64
 }
 
 @private
@@ -53,8 +54,14 @@ mouse_button_callback :: proc "c" (window: Window, button, action, mods: i32) {
 	}
 }
 
+@private
+scroll_callback :: proc "c" (window: Window, _, yoffset: f64) {
+	input.scroll_offset += yoffset
+}
+
 key_pressed :: proc(k: Key) -> bool { return input.key_pressed[i32(k)] }
 key_down :: proc(k: Key) -> bool { return input.key_down[i32(k)] }
+scroll_delta :: proc() -> f64 { return input.scroll_offset }
 
 mouse_drag_delta :: proc() -> Maybe([2]f64) {
 	if input.mouse_down {
@@ -66,4 +73,5 @@ mouse_drag_delta :: proc() -> Maybe([2]f64) {
 update_input :: proc() {
 	input.key_pressed = {}
 	input.cursor_delta = {}
+	input.scroll_offset = 0
 }
