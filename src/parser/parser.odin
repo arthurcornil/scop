@@ -50,6 +50,10 @@ parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
 	}
 	defer delete(data)
 
+	if len(data) == 0 {
+		return .Empty_File
+	}
+
 	unique_corners: map[Face_Corner]u32
 	defer delete(unique_corners)
 	vertex_pos_ids: [dynamic]int
@@ -83,6 +87,9 @@ parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
 			}
 			delete(indices)
 		}
+	}
+	if len(m.vertices) == 0 {
+		return .Wrong_Format
 	}
 	workout_normals(m, vertex_pos_ids)
 	return nil

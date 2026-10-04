@@ -16,7 +16,8 @@ Parsing_Error :: enum {
 	Wrong_Number_Of_Attributes,
 	Not_A_Face,
 	Zero_Face_Index,
-	Out_Of_Bounds
+	Out_Of_Bounds,
+	Empty_File,
 }
 
 GLFW_Error :: enum {
@@ -52,13 +53,15 @@ report :: proc(err: Error) {
 		case .Wrong_Tag:
 			details = "Wrong tag"
 		case .Wrong_Format:
-			details = "Format Error"
+			details = "Wrong format"
 		case .Wrong_Number_Of_Attributes:
 			details = "Too many or few attributes"
 		case .Zero_Face_Index:
 			details = "Index '0' found in face"
 		case .Out_Of_Bounds:
 			details = "Out of bounds index found in face"
+		case .Empty_File:
+			details = "Empty file"
 		}
 	case Shader_Error:
 		error_type = "Shader Error"

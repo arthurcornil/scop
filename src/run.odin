@@ -10,6 +10,9 @@ import "./platform"
 import "./scene"
 import "./vmath"
 
+AXIS_KEYS := [3]platform.Key{.X, .Y, .Z}
+TRANSLATION_SPEED :: 1.0
+
 Environment :: struct {
 	model: scene.Object,
 	camera: scene.Camera,
@@ -25,7 +28,7 @@ init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
 
 	center := mesh.center(m)
 	radius := mesh.radius(center, m)
-	env.model = scene.Object{center = center, is_rotating = true}
+	env.model = scene.Object{center = center, is_rotating = false, rotation = 1}
 
 	env.camera = scene.make_cam(radius)
 	env.light = scene.make_light(radius)
@@ -37,7 +40,16 @@ init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
 	return
 }
 
-handle_inputs :: proc(win: platform.Window, env: ^Environment) {
+handle_inputs :: proc(win: platform.Window, env: ^Environment, dt: f32) {
+	for key, axis in AXIS_KEYS {
+		if !platform.key_down(key) do continue
+		dir: f32 = platform.shift_down() ? -1 : 1
+		if platform.alt_down() {
+			scene.rotate_obj(&env.model, axis, dir * dt)
+		} else {
+			env.model.position[axis] += dir * env.camera.radius * TRANSLATION_SPEED * dt
+		}
+	}
 	switch {
 	case platform.key_pressed(.Escape):
 		platform.close(win)
@@ -60,15 +72,16 @@ run :: proc(path: string) -> (err: errors.Error) {
 	defer renderer.destroy(&env.gpu_data)
 
 	last := platform.time()
-
 	for !platform.should_close(win) {
-		platform.poll_events(win)
-		handle_inputs(win, &env)
-
 		now := platform.time()
-		scene.update(&env.model, f32(now - last))
-		scene.update(&env.light, env.camera)
+		dt := min(f32(now - last), 0.1)
 		last = now
+
+		platform.poll_events(win)
+		handle_inputs(win, &env, dt)
+
+		scene.update(&env.model, dt)
+		scene.update(&env.light, env.camera)
 
 		renderer.begin_frame()
 		obj_trans_pipeline := renderer.Trans_Pipeline{
