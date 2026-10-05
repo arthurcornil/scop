@@ -11,6 +11,7 @@ VERTEX_SRC :: #load("../shaders/vertex.glsl", cstring)
 LIT_FRAGMENT_SRC :: #load("../shaders/lit_fragment.glsl", cstring)
 DEFAULT_FRAGMENT_SRC :: #load("../shaders/default_fragment.glsl", cstring)
 DEFAULT_TEXTURE_PATH :: "./resources/nggyu.bmp"
+TEXTURE_FADE_DURATION :: 1.0
 
 Trans_Pipeline :: struct {
 	model: vmath.Mat4,
@@ -23,7 +24,8 @@ Data :: struct {
 	default_shader: Shader,
 	obj_mesh: GPU_Mesh,
 	light_marker_mesh: GPU_Mesh,
-	texture: u32
+	texture: u32,
+	texture_opacity: f32
 }
 
 init_data :: proc(m: ^mesh.Mesh) -> (data: Data, err: errors.Error) {
@@ -37,6 +39,16 @@ init_data :: proc(m: ^mesh.Mesh) -> (data: Data, err: errors.Error) {
 	}
 	data.texture = load_texture(DEFAULT_TEXTURE_PATH) or_return
 	return
+}
+
+update_texture_opacity :: proc(d: ^Data, visible: bool, delta: f32) {
+	target: f32 = 1.0 if visible else 0.0
+	step := delta / TEXTURE_FADE_DURATION
+	if d.texture_opacity < target {
+		d.texture_opacity = min(d.texture_opacity + step, target)
+	} else {
+		d.texture_opacity = max(d.texture_opacity - step, target)
+	}
 }
 
 destroy :: proc(d: ^Data) {
@@ -70,6 +82,7 @@ draw_scene :: proc(d: Data, obj_trans: Trans_Pipeline, light_trans: Trans_Pipeli
 	gl.UniformMatrix4fv(d.lit_shader.u_view, 1, gl.FALSE, &view[0][0])
 	gl.UniformMatrix4fv(d.lit_shader.u_proj, 1, gl.FALSE, &proj[0][0])
 	gl.Uniform4fv(d.lit_shader.u_light_pos, 1, &light_pos[0])
+	gl.Uniform1f(d.lit_shader.u_mix, d.texture_opacity)
 
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	gl.BindVertexArray(d.obj_mesh.vao)

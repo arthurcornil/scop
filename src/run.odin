@@ -17,7 +17,8 @@ Environment :: struct {
 	model: scene.Object,
 	camera: scene.Camera,
 	light: scene.Light_Source,
-	gpu_data: renderer.Data
+	gpu_data: renderer.Data,
+	apply_texture: bool
 }
 
 init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
@@ -55,6 +56,8 @@ handle_inputs :: proc(win: platform.Window, env: ^Environment, dt: f32) {
 		platform.close(win)
 	case platform.key_pressed(.Enter):
 		env.model.is_rotating = !env.model.is_rotating
+	case platform.key_pressed(.T):
+		env.apply_texture = !env.apply_texture
 	}
 	if delta, ok := platform.mouse_drag_delta().?; ok {
 		scene.orbit(&env.camera, ([2]f32)(delta))
@@ -82,6 +85,7 @@ run :: proc(path: string) -> (err: errors.Error) {
 
 		scene.update(&env.model, dt)
 		scene.update(&env.light, env.camera)
+		renderer.update_texture_opacity(&env.gpu_data, env.apply_texture, dt)
 
 		renderer.begin_frame()
 		obj_trans_pipeline := renderer.Trans_Pipeline{

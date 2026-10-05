@@ -8,6 +8,7 @@ Key :: enum i32 {
 	X = glfw.KEY_X,
 	Y = glfw.KEY_Y,
 	Z = glfw.KEY_Z,
+	T = glfw.KEY_T
 }
 
 @private
