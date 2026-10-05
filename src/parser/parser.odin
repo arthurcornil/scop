@@ -42,6 +42,27 @@ workout_normals :: proc(m: ^mesh.Mesh, vertex_pos_ids: [dynamic]int) {
 	}
 }
 
+generate_textcoords :: proc(m: ^mesh.Mesh) {
+	lowest, highest := mesh.bounds(m^)
+	size := highest - lowest
+
+	drop := 0
+	for i in 1..<3 do if size[i] < size[drop] do drop = i
+
+	AXES := [3][2]int{{2, 1}, {0, 2}, {0, 1}}
+	a, b := AXES[drop][0], AXES[drop][1]
+
+	extent := max(size[a], size[b])
+	if extent == 0 do extent = 1
+
+	for &v in m.vertices {
+		v.textcoords = {
+			(v.pos[a] - lowest[a]) / extent,
+			(v.pos[b] - lowest[b]) / extent,
+		}
+	}
+}
+
 parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
 	data: []u8
 	data, err = os.read_entire_file(file_name, context.allocator)
@@ -92,5 +113,8 @@ parse :: proc(file_name: string, m: ^mesh.Mesh) -> (err: errors.Error) {
 		return .Wrong_Format
 	}
 	workout_normals(m, vertex_pos_ids)
+	if len(m.textcoords) == 0 {
+		generate_textcoords(m)
+	}
 	return nil
 }

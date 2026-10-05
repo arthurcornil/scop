@@ -25,9 +25,9 @@ destroy :: proc(m: ^Mesh) {
 	m^ = {}
 }
 
-center :: proc(m: Mesh) -> (center_vec: [3]f32) {
-	lowest := m.raw_vertices[0]
-	highest := lowest
+bounds :: proc(m: Mesh) -> (lowest, highest: [3]f32) {
+	lowest = m.raw_vertices[0]
+	highest = lowest
 
 	for vertex in m.raw_vertices {
 		for coord, j in vertex {
@@ -39,6 +39,11 @@ center :: proc(m: Mesh) -> (center_vec: [3]f32) {
 			}
 		}
 	}
+	return
+}
+
+center :: proc(m: Mesh) -> (center_vec: [3]f32) {
+	lowest, highest := bounds(m)
 	center_vec = (lowest + highest) / 2
 	return 
 }

@@ -1,9 +1,11 @@
 #version 330 core
 in vec3 fragPos;
 in vec3 normal;
+in vec2 TexCoord;
 out vec4 FragColor;
 
 uniform vec4 light_pos;
+uniform sampler2D u_texture;
 
 void main()
 {
@@ -14,5 +16,6 @@ void main()
 	float ambient = 0.4;
 	float grey = ambient + (1.0 - ambient) * shade;
 
-	FragColor = vec4(grey, grey, grey, 1.0f);
+	vec4 texColor = texture(u_texture, TexCoord);
+	FragColor = texColor * vec4(grey, grey, grey, 1.0f);
 }

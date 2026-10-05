@@ -2,6 +2,7 @@ package errors
 
 import "core:fmt"
 import "core:os"
+import "core:image"
 
 Shader_Error :: enum {
 	None = 0,
@@ -30,7 +31,8 @@ Error :: union #shared_nil {
 	os.Error,
 	Parsing_Error,
 	GLFW_Error,
-	Shader_Error
+	Shader_Error,
+	image.Error
 }
 
 report :: proc(err: Error) {
@@ -72,6 +74,9 @@ report :: proc(err: Error) {
 	case os.Error:
 		error_type = "OS Error"
 		details = os.error_string(e)
+	case image.Error:
+		error_type = "Image Error"
+		details = fmt.tprintf("%v", e)
 	}
 	fmt.eprintfln("%s: %s", error_type, details)
 }
