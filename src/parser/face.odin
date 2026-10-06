@@ -102,7 +102,11 @@ parse_corners :: proc(tokens: []string, m: mesh.Mesh) -> (corners: []Face_Corner
 	corners = make([]Face_Corner, len(tokens) - 1)
 	for token, i in tokens {
 		if i == 0 do continue
-		corner := parse_corner(token, m) or_return
+		corner: Face_Corner
+		if corner, err = parse_corner(token, m); err != nil {
+			delete(corners)
+			return {}, err
+		}
 		corners[i - 1] = corner
 	}
 	return

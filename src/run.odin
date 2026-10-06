@@ -23,6 +23,7 @@ Environment :: struct {
 
 init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
 	m := mesh.Mesh{}
+	defer mesh.destroy(&m)
 	if err = parser.parse(path, &m); err != nil {
 		return {}, err
 	}
@@ -37,7 +38,6 @@ init_env :: proc(path: string) -> (env: Environment, err: errors.Error) {
 	if env.gpu_data, err = renderer.init_data(&m); err != nil {
 		return {}, err
 	}
-	mesh.destroy(&m)
 	return
 }
 

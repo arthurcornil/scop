@@ -31,10 +31,14 @@ Data :: struct {
 init_data :: proc(m: ^mesh.Mesh) -> (data: Data, err: errors.Error) {
 	data.obj_mesh = upload(m.vertices[:], m.indices[:])
 	if data.lit_shader, err = create_program(VERTEX_SRC, LIT_FRAGMENT_SRC); err != nil {
+		gpu_mesh_destroy(&data.obj_mesh)
 		return {}, err
 	}
 	data.light_marker_mesh = upload(LIGHT_MARKER_VERTICES[:], LIGHT_MARKER_INDICES[:])
 	if data.default_shader, err = create_program(VERTEX_SRC, DEFAULT_FRAGMENT_SRC); err != nil {
+		gpu_mesh_destroy(&data.obj_mesh)
+		gpu_mesh_destroy(&data.light_marker_mesh)
+		program_destroy(data.lit_shader)
 		return {}, err
 	}
 	data.texture = load_texture(DEFAULT_TEXTURE_PATH) or_return
