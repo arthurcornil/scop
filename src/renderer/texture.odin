@@ -25,6 +25,7 @@ load_texture :: proc(path: string) -> (texture: u32, err: image.Error){
 		gl.UNSIGNED_BYTE,
 		raw_data(img.pixels.buf)
 	)
+	image.destroy(img)
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	return
 }

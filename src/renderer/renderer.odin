@@ -60,6 +60,7 @@ destroy :: proc(d: ^Data) {
 	gpu_mesh_destroy(&d.light_marker_mesh)
 	program_destroy(d.lit_shader)
 	program_destroy(d.default_shader)
+	gl.DeleteTextures(1, &d.texture)
 }
 
 @private
